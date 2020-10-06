@@ -26,7 +26,7 @@ results = []
 
 
 # Item we are searching for
-item = "paypal"
+item = input("What are you searching for?")
 
 
 # Checking the 10 newest posts and printing any matches for the item
