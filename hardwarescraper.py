@@ -2,7 +2,8 @@ import praw
 import gspread
 from dotenv import load_dotenv
 import os
-
+import datetime
+import time
 
 # Dotenv
 load_dotenv()
@@ -29,6 +30,9 @@ results = []
 item = input("What are you searching for?")
 
 
+
+
+
 # Checking the 10 newest posts and printing any matches for the item
 while True:
     new_posts = reddit.subreddit('hardwareswap').new(limit=10)
@@ -36,10 +40,12 @@ while True:
         if item in post.title.lower():
             if post.title not in results:
                 results.append(post.title)
-                row = [post.title]
+                row = [datetime.datetime.now().strftime('%m-%d %H:%M'), post.title, post.url]
                 index = 1
                 sheet.insert_row(row, index)
                 print(post.title)
+                print(post.url)
+                time.sleep(30)
 
 
             
