@@ -4,15 +4,22 @@ from dotenv import load_dotenv
 import os
 import datetime
 import time
+from twilio.rest import Client
 
-# Dotenv
+
 load_dotenv()
-clientcreds = os.getenv('client_creds')
-secretcreds = os.getenv('secret_creds')
 
 
 # PRAW
+clientcreds = os.getenv('client_creds')
+secretcreds = os.getenv('secret_creds')
 reddit = praw.Reddit(client_id=clientcreds, client_secret=secretcreds, user_agent='hardwareswapscraper')
+
+
+# Twilio
+account_sid = os.getenv('sid')
+auth_token = os.getenv('token')
+client = Client(account_sid, auth_token)
 
 
 # Google Spreadsheets auth
@@ -22,6 +29,14 @@ sh = gc.open_by_key("1Wch_VKB2Hop_QtRC0_0VLuMxlYSrZ6Ac5CHLHSNa42U")  # ID in URL
 sheet = sh.sheet1
 
 
+# Send SMS alert once item is found
+def sms_alert():
+    client.messages.create(
+        to=number,
+        from_="+12566678863",
+        body=post.url)
+
+
 # Setting empty string to append results to
 results = []
 
@@ -29,11 +44,11 @@ results = []
 # Item we are searching for
 item = input("What are you searching for?")
 
+# Phone number to send sms alert to
+number = int(input("Enter your phone number: "))
 
 
-
-
-# Checking the 10 newest posts and printing any matches for the item
+# Checking the 10 newest posts
 while True:
     new_posts = reddit.subreddit('hardwareswap').new(limit=10)
     for post in new_posts:
@@ -43,10 +58,6 @@ while True:
                 row = [datetime.datetime.now().strftime('%m-%d %H:%M'), post.title, post.url]
                 index = 1
                 sheet.insert_row(row, index)
+                sms_alert()
                 print(post.title)
                 print(post.url)
-                time.sleep(30)
-
-
-            
-
