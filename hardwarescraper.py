@@ -29,7 +29,7 @@ sh = gc.open_by_key("1Wch_VKB2Hop_QtRC0_0VLuMxlYSrZ6Ac5CHLHSNa42U")  # ID in URL
 sheet = sh.sheet1
 
 
-# Send SMS alert once item is found
+# Send SMS with url to post once item is found
 def sms_alert():
     client.messages.create(
         to=number,
@@ -41,23 +41,33 @@ def sms_alert():
 results = []
 
 
-# Item we are searching for
-item = input("What are you searching for?")
+# Item(s) we are searching for
+search_items = []
+
+
+# Find out how many items we are searching for and add them to a list.
+num = int(input("How many items are you searching for?"))
+count = 1
+for i in range(num):
+    search_items.append(input(f"Enter item # {count}: "))
+    print(search_items)
+    count += 1
+
 
 # Phone number to send sms alert to
 number = int(input("Enter your phone number: "))
 
 
-# Checking the 10 newest posts
+# Loop checking the 10 newest posts on specified subreddit
 while True:
     new_posts = reddit.subreddit('hardwareswap').new(limit=10)
     for post in new_posts:
-        if item in post.title.lower():
-            if post.title not in results:
-                results.append(post.title)
-                row = [datetime.datetime.now().strftime('%m-%d %H:%M'), post.title, post.url]
-                index = 1
-                sheet.insert_row(row, index)
-                sms_alert()
-                print(post.title)
-                print(post.url)
+        match = any(item in post.title.lower() for item in search_items)
+        if match and post.title not in results:
+            results.append(post.title)
+            row = [datetime.datetime.now().strftime('%m-%d %H:%M'), post.title, post.url]
+            index = 1
+            sheet.insert_row(row, index)
+            # sms_alert()
+            print(post.title)
+            print(post.url)
